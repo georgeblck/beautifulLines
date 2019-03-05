@@ -28,17 +28,17 @@ europe1 <- europeDat %>%
   ggthemes::theme_map() +
   coord_equal(0.9)
 
-euPlot <- europe0 + europe1 
+euPlot <- europe0 / europe1 
 
 ggsave(filename = paste0("plots/europe_", gsub("[^[:alnum:]=\\.]", "", lubridate::now()), ".pdf"), 
-       plot = euPlot, width = 1189, height = 841, units = "mm")
+       plot = euPlot, height = 1189, width = 841, units = "mm")
 
 gerDat <- read_csv("GEOSTAT-grid-POP-1K-2011-V2-0-1/Version 2_0_1/GEOSTAT_grid_POP_1K_2011_V2_0_1.csv") %>%
   rbind(read_csv("GEOSTAT-grid-POP-1K-2011-V2-0-1/Version 2_0_1/JRC-GHSL_AIT-grid-POP_1K_2011.csv") %>%
           mutate(TOT_P_CON_DT='')) %>%
   mutate(lat = as.numeric(gsub('.*N([0-9]+)[EW].*', '\\1', GRD_ID))/100,
          lng = as.numeric(gsub('.*[EW]([0-9]+)', '\\1', GRD_ID)) * ifelse(gsub('.*([EW]).*', '\\1', GRD_ID) == 'W', -1, 1) / 100) %>%
-  filter(CNTR_CODE == "CH")
+  filter(CNTR_CODE == "DE")
 
 ger0 <- gerDat %>%
   group_by(lat=round(lat, 1), lng=round(lng, 2)) %>%
@@ -87,17 +87,17 @@ gerPlot <- read_csv("GEOSTAT-grid-POP-1K-2011-V2-0-1/Version 2_0_1/GEOSTAT_grid_
           mutate(TOT_P_CON_DT='')) %>%
   mutate(lat = as.numeric(gsub('.*N([0-9]+)[EW].*', '\\1', GRD_ID))/100,
          lng = as.numeric(gsub('.*[EW]([0-9]+)', '\\1', GRD_ID)) * ifelse(gsub('.*([EW]).*', '\\1', GRD_ID) == 'W', -1, 1) / 100) %>%
-  filter(DATA_SRC == "DE") %>%
-  group_by(lat=round(lat, 1), lng=round(lng, 2)) %>%
+  filter(DATA_SRC == "NO") %>%
+  group_by(lat=round(lat, 2), lng=round(lng, 2)) %>%
   summarize(value = sum(TOT_P, na.rm=TRUE))  %>%
   ungroup() %>%
-  complete(lat, lng) %>%
-  ggplot(aes(lng, lat + 2*(value/max(value, na.rm=TRUE)))) +
+  complete(lat, lng, fill = list(value=NA)) %>%
+  ggplot(aes(lng, lat + 5*(value/max(value, na.rm=TRUE)))) +
   geom_line(size=0.1, alpha=0.9, color="black", aes(group=lat), na.rm=TRUE) +
   ggthemes::theme_map() +coord_equal(0.9)
 print(gerPlot)
 
-ggsave(filename = paste0("plots/germany_", gsub("[^[:alnum:]=\\.]", "", lubridate::now()), ".pdf"), plot = gerPlot, width = 841, height = 1189, units = "mm")
+ggsave(filename = paste0("plots/nor_", gsub("[^[:alnum:]=\\.]", "", lubridate::now()), ".pdf"), plot = gerPlot, width = 841, height = 1189, units = "mm")
 
 
 
